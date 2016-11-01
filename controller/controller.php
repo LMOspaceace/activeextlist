@@ -8,6 +8,8 @@
 */
 namespace spaceace\activeextlist\controller;
 
+use phpbb\exception\http_exception;
+
 class controller
 {
 	/* @var \phpbb\auth\auth */
@@ -25,6 +27,9 @@ class controller
 	/* @var \phpbb\user */
 	protected $user;
 
+	/* @var extension_manager */
+	protected $extension_manager;
+
 	/**
 	* Constructor
 	*
@@ -33,41 +38,46 @@ class controller
 	* @param \phpbb\controller\helper		$helper
 	* @param \phpbb\template\template		$template
 	* @param \phpbb\user					$user
+	* @param \phpbb\extension_manager 		$extension_manager
 	*/
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\config\config $config, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\user $user, \phpbb\extension\manager $phpbb_extension_manager)
+	public function __construct(
+		\phpbb\auth\auth $auth,
+		\phpbb\config\config $config,
+		\phpbb\controller\helper $helper,
+		\phpbb\template\template $template,
+		\phpbb\user $user,
+		\phpbb\extension\manager $extension_manager)
 	{
 		$this->auth = $auth;
 		$this->config = $config;
 		$this->helper = $helper;
 		$this->template = $template;
 		$this->user = $user;
-		$this->phpbb_extension_manager = $phpbb_extension_manager;
+		$this->extension_manager = $extension_manager;
 	}
 
 	/**
 	* Get the extension info
-	*
-	*
 	*/
 	public function get_ext_info()
 	{
 		// check auth
 		if (!$this->auth->acl_get('u_activeextlist_view'))
 		{
-			trigger_error('NOT_AUTHORISED');
+			throw new http_exception(403, 'NOT_AUTHORISED');
 		}
 
 		$this->user->add_lang_ext('spaceace/activeextlist', 'common');
 
-		foreach ($this->phpbb_extension_manager->all_enabled() as $name => $location)
+		foreach ($this->extension_manager->all_enabled() as $name => $location)
 		{
-			$md_manager = $this->phpbb_extension_manager->create_extension_metadata_manager($name, $this->template);
+			$md_manager = $this->extension_manager->create_extension_metadata_manager($name, $this->template);
 			$meta = $md_manager->get_metadata('all');
 
 			$this->template->assign_block_vars('activeextlist', array(
 				'NAME'			=> $meta['extra']['display-name'],
-				'DESCRIPTION'		=> $meta['description'],
-				'VERSION'			=> $meta['version'],
+				'DESCRIPTION'	=> $meta['description'],
+				'VERSION'		=> $meta['version'],
 			));
 		}
 		return $this->helper->render('activeextlist_body.html', $this->user->lang['ACTIVE_EXT']);

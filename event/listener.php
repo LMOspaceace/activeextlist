@@ -2,7 +2,7 @@
 /**
 *
 * @package phpBB Extension - Active Extensions List
-* @copyright (c) 2015 dmzx - http://www.dmzx-web.net
+* @copyright (c) 2016 dmzx - http://www.dmzx-web.net
 * @copyright (c) 2016 spaceace - http://www.livemembersonly.com
 * @license http://opensource.org/licenses/gpl-2.0.php GNU General Public License v2
 *
@@ -47,7 +47,13 @@ class listener implements EventSubscriberInterface
 	* @param \phpbb\db\driver\driver_interface	$db
 	* @param string								$php_ext
 	*/
-	public function __construct(\phpbb\auth\auth $auth, \phpbb\controller\helper $helper, \phpbb\template\template $template, \phpbb\user $user, \phpbb\db\driver\driver_interface $db, $php_ext)
+	public function __construct(
+		\phpbb\auth\auth $auth,
+		\phpbb\controller\helper $helper,
+		\phpbb\template\template $template,
+		\phpbb\user $user,
+		\phpbb\db\driver\driver_interface $db,
+		$php_ext)
 	{
 		$this->auth = $auth;
 		$this->helper = $helper;
@@ -83,12 +89,12 @@ class listener implements EventSubscriberInterface
 	}
 
 	/*
-	 * Add permissions
+	 * Add permission
 	 */
 	public function permissions($event)
 	{
 		$permissions = $event['permissions'];
-		$permissions['u_activeextlist_view']		 = array('lang' => 'ACL_U_ACTIVEEXTLIST_VIEW', 'cat' => 'misc');
+		$permissions['u_activeextlist_view'] = array('lang' => 'ACL_U_ACTIVEEXTLIST_VIEW', 'cat' => 'misc');
 		$event['permissions'] = $permissions;
 	}
 
@@ -102,12 +108,13 @@ class listener implements EventSubscriberInterface
 				FROM ' . EXT_TABLE;
 			$result = $this->db->sql_query($sql);
 			$ext_count = (int) $this->db->sql_fetchfield('count');
+			$this->db->sql_freeresult($result);
 
 			$this->template->assign_vars(array(
-				'ACTIVE_EXT'	=> $this->user->lang['ACTIVE_EXT'] . ' <strong>' . number_format($ext_count) . '</strong>',
+				'ACTIVE_EXT'			=> $this->user->lang('ACTIVE_EXT', $ext_count),
 				'U_ACTIVEEXTLIST_VIEW'	=> $this->helper->route('spaceace_activeextlist_controller', array()),
 			));
+
 		}
 	}
-
 }

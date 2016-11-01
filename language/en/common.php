@@ -37,7 +37,10 @@ if (empty($lang) || !is_array($lang))
 //
 
 $lang = array_merge($lang, array(
-	'ACTIVE_EXT'			=> 'Active extensions',
+	'ACTIVE_EXT'			=> array(
+		1 => '<strong>%s</strong> Active extension',
+		2 => '<strong>%s</strong> Active extensions',
+	),
 	'VIEWING_ACTIVE_EXT'	=> 'Viewing Active Extensions',
 	'NAME'					=> 'Name',
 	'DESCRIPTION'			=> 'Description',
